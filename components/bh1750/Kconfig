@@ -1,0 +1,11 @@
+menu "BH1750"
+
+config BH1750_I2C_SDA_GPIO
+    int "BH1750 SDA GPIO"
+    default 21
+
+config BH1750_I2C_SCL_GPIO
+    int "BH1750 SCL GPIO"
+    default 22
+
+endmenu

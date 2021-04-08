@@ -1,0 +1,18 @@
+menu "MH-Z19 CO2 Sensor"
+
+config MHZ19_UART_NUM
+    hex "uart num"
+    default 1
+
+config MHZ19_UART_RXD_PIN
+    int "RX gpio"
+    default 33
+    help
+        GPIO pin connected to sensor RX line. This pin can be R/O (>=34).
+        
+config MHZ19_UART_TXD_PIN
+    int "TX gpio"
+    default 32
+    help
+        GPIO pin connected to sensor TX line.
+endmenu

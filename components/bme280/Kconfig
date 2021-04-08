@@ -1,0 +1,11 @@
+menu "BME280"
+
+config BME280_I2C_SDA_GPIO
+    int "BME280 SDA GPIO"
+    default 21
+
+config BME280_I2C_SCL_GPIO
+    int "BME280 SCL GPIO"
+    default 22
+
+endmenu
