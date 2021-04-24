@@ -8,5 +8,6 @@
 #include "app-globals.h"
 #include "app-display.h"
 #include "app-sensors.h"
+#include "app-wifi.h"
 
 #endif
