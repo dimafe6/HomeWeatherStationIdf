@@ -41,7 +41,7 @@ void task_test_nrf24(void *pvParameters)
         {
             radio.read(&externalSensor, sizeof(externalSensor.temperature));
 
-            printf("Temp: %d\n", externalSensor.temperature);
+            printf("Temp(%d): %d\n", pipeNum, externalSensor.temperature);
         }
     }
 }
@@ -101,7 +101,9 @@ void app_main()
 
     wifi_scan();    
 
-    wifi_init_sta();
+    wifi_init_sta(CONFIG_DEFAULT_WIFI_SSID, CONFIG_DEFAULT_WIFI_PASS);
+
+    obtain_time();
 
     /*while (1)
     {

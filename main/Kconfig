@@ -53,4 +53,11 @@ config CO2_HISTORY_ONE_HOUR_INTERVAL
     int "CO2_HISTORY_ONE_HOUR_INTERVAL"
     default 60000
     
+config DEFAULT_WIFI_SSID
+    string  "DEFAULT_WIFI_SSID"
+    default "dimaPC"
+
+config DEFAULT_WIFI_PASS
+    string  "DEFAULT_WIFI_PASS"
+    default "12345678"
 endmenu
