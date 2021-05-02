@@ -12,30 +12,36 @@
 static const char *TAG = "WiFi";
 
 /* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
+static EventGroupHandle_t s_wifi_event_group = NULL;
 bool initialized = false;
 esp_event_handler_instance_t instance_any_id;
 esp_event_handler_instance_t instance_got_ip;
+
+void wifi_reconnect()
+{
+    xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    esp_wifi_connect();
+    ESP_LOGI(TAG, "retry to connect to the AP");
+    ESP_LOGI(TAG, "connect to the AP fail");
+}
 
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_DISCONNECTED))
     {
-        esp_wifi_connect();
-        ESP_LOGI(TAG, "retry to connect to the AP");
-        ESP_LOGI(TAG, "connect to the AP fail");
+        wifi_reconnect();
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+
+        obtain_time_from_ntp();
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP)
     {
-        esp_wifi_connect();
-        ESP_LOGI(TAG, "retry to connect to the AP");
-        ESP_LOGI(TAG, "connect to the AP fail");
+        wifi_reconnect();
     }
 }
 
@@ -113,22 +119,19 @@ void wifi_init_sta(const char *ssid, const char *password)
     esp_err_t ret = esp_wifi_connect();
     if (ret != ESP_OK)
     {
+        xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
         ESP_LOGI(TAG, "failed to connect");
         return;
     }
 
     ESP_LOGI(TAG, "wifi_init_sta finished.");
 
-    /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
-     * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
                                            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
                                            pdFALSE,
                                            pdFALSE,
                                            portMAX_DELAY);
 
-    /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
-     * happened. */
     if (bits & WIFI_CONNECTED_BIT)
     {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s", wifi_config.sta.ssid, wifi_config.sta.password);
@@ -141,4 +144,14 @@ void wifi_init_sta(const char *ssid, const char *password)
     {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
+}
+
+bool wifi_connected()
+{
+    if (!s_wifi_event_group)
+    {
+        return false;
+    }
+
+    return xEventGroupGetBits(s_wifi_event_group) & WIFI_CONNECTED_BIT;
 }

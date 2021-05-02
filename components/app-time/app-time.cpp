@@ -2,37 +2,67 @@
 
 static const char *TAG = "Time";
 
-void time_sync_notification_cb(struct timeval *tv)
+static void sync_rtc_time_from_local_time()
 {
-    ESP_LOGI(TAG, "Notification of a time synchronization event");
+    i2c_dev_t dev;
+    memset(&dev, 0, sizeof(i2c_dev_t));
+
+    ESP_ERROR_CHECK(ds3231_init_desc(&dev, 0, (gpio_num_t)CONFIG_BME280_I2C_SDA_GPIO, (gpio_num_t)CONFIG_BME280_I2C_SCL_GPIO));
+
+    time_t now = 0;
+    time(&now);
+    ds3231_set_time(&dev, localtime(&now));
+
+    struct tm *local;
+    local = localtime(&now);
+    ESP_LOGI(TAG, "Current time: %04d-%02d-%02d %02d:%02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+    ESP_ERROR_CHECK(ds3231_free_desc(&dev));
 }
 
-static void initialize_sntp(void)
+void time_sync_notification_cb(struct timeval *tv)
 {
-    ESP_LOGI(TAG, "Initializing SNTP");
+    if (sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED)
+    {
+        ESP_LOGI(TAG, "Time successfully synced from the NTP");
+        sync_rtc_time_from_local_time();
+    }
+}
+
+void set_timezone(const char *tz)
+{
+    setenv("TZ", tz, 1);
+    tzset();
+}
+
+void obtain_time_from_ntp()
+{
+    ESP_LOGI(TAG, "Trying to get time from NTP");
+
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setservername(0, "pool.ntp.org");
     sntp_set_time_sync_notification_cb(time_sync_notification_cb);
     sntp_init();
 }
 
-void obtain_time(void)
+bool obtain_time_from_rtc()
 {
-    setenv("TZ", "EET-2EEST,M3.5.0/3,M10.5.0/4", 1); //TODO: Configure from display
-    tzset();
+    i2c_dev_t dev;
+    memset(&dev, 0, sizeof(i2c_dev_t));
 
-    initialize_sntp();
+    ESP_ERROR_CHECK(ds3231_init_desc(&dev, 0, (gpio_num_t)CONFIG_BME280_I2C_SDA_GPIO, (gpio_num_t)CONFIG_BME280_I2C_SCL_GPIO));
 
-    time_t now = 0;
-    struct tm timeinfo = {0};
-    int retry = 0;
-    const int retry_count = 10;
-    while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count)
+    struct tm tim;
+    if (ds3231_get_time(&dev, &tim) != ESP_OK)
     {
-        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        return false;
     }
-    time(&now);
-    localtime_r(&now, &timeinfo);
-}
 
+    time_t t = mktime(&tim);
+    struct timeval nowtime = {.tv_sec = t};
+    settimeofday(&nowtime, NULL);
+
+    ESP_LOGI(TAG, "Current time: %04d-%02d-%02d %02d:%02d:%02d", tim.tm_year + 1900, tim.tm_mon + 1, tim.tm_mday, tim.tm_hour, tim.tm_min, tim.tm_sec);
+    ESP_ERROR_CHECK(ds3231_free_desc(&dev));
+
+    return true;
+}

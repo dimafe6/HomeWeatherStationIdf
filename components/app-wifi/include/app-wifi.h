@@ -11,9 +11,11 @@
 #include "esp_system.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "app-time.h"
 
 void wifi_init(void);
 void wifi_scan(void);
 void wifi_init_sta(const char *ssid = NULL, const char *password = NULL);
+bool wifi_connected();
 
 #endif
