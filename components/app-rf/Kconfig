@@ -1,0 +1,34 @@
+menu "NRF24L01 config"
+
+config APP_RF_CE_PIN
+    int "CE pin"
+    default 2
+
+config APP_RF_CSN_PIN
+    int "CSN pin"
+    default 4
+
+config APP_RF_CHANNEL
+    int "Channel"
+    default 80
+    range 0 124
+
+config APP_RF_PA_LEVEL
+    int "Power amplifier level"
+    default 3
+    range 0 3
+    help
+        0 - Min
+        1 - Low
+        2 - High
+        3 - Max
+
+config APP_RF_DATA_RATE
+    int "Data rate"
+    default 2
+    range 0 2
+    help
+        0 - 1MBPS
+        1 - 2MBPS
+        2 - 250KBPS
+endmenu

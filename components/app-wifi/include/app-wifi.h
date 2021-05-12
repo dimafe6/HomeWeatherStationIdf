@@ -13,6 +13,11 @@
 #include "lwip/sys.h"
 #include "app-time.h"
 
+#include "mqtt_client.h"
+
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT BIT1
+
 void wifi_init(void);
 void wifi_scan(void);
 void wifi_init_sta(const char *ssid = NULL, const char *password = NULL);

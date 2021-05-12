@@ -10,5 +10,6 @@
 #include "app-sensors.h"
 #include "app-wifi.h"
 #include "app-time.h"
+#include "app-rf.h"
 
 #endif

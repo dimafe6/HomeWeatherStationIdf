@@ -40,10 +40,8 @@ struct ExternalSensorData
   float humidity;
   float humidityMin;
   float humidityMax;
-  float dewPoint;
-  float humIndex;
-  uint32_t measurementTime = 0;
-  uint16_t sleepTime = 0;
+  int16_t dewPoint;
+  int16_t humIndex;
   uint8_t battery = 255;
   uint8_t signal = 255;
 };
@@ -54,7 +52,6 @@ extern InternalSensorData internalSensorData;
 extern InternalSensorData prevInternalSensorData;
 extern ExternalSensor externalSensor;
 extern ExternalSensorData externalSensorData[CONFIG_APP_RF_SENSORS_COUNT];
-extern ExternalSensorData prevExternalSensorData[CONFIG_APP_RF_SENSORS_COUNT];
 
 extern float externalTemperatureLast24H[CONFIG_APP_RF_SENSORS_COUNT][96];
 extern float externalTemperatureLastHour[CONFIG_APP_RF_SENSORS_COUNT][60];

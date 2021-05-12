@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "app-display.h"
 
 const char *TAG = "Nextion";
