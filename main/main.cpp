@@ -35,12 +35,11 @@ void app_main()
 
     TaskHandle_t xHandle = NULL;
 
-    /*xTaskCreatePinnedToCore(nrf24_task, "nrf24_task", configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL, APP_CPU_NUM);
+    xTaskCreatePinnedToCore(nrf24_task, "nrf24_task", configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bme280_task, "bme280_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(mhz19_task, "mhz19_task", configMINIMAL_STACK_SIZE * 2, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bh1750_task, "bh1750_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(display_task, "display_task", configMINIMAL_STACK_SIZE * 3, NULL, 4, NULL, APP_CPU_NUM);
-*/
     
 
     /*while (1)

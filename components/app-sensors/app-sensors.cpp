@@ -10,7 +10,13 @@ void bme280_task(void *pvParameters)
   memset(&dev, 0, sizeof(bmp280_t));
 
   ESP_ERROR_CHECK(bmp280_init_desc(&dev, BMP280_I2C_ADDRESS_0, 0, (gpio_num_t)CONFIG_BME280_I2C_SDA_GPIO, (gpio_num_t)CONFIG_BME280_I2C_SCL_GPIO));
-  ESP_ERROR_CHECK(bmp280_init(&dev, &params));
+  if (bmp280_init(&dev, &params) != ESP_OK)
+  {
+    bmp280_free_desc(&dev);
+    vTaskDelete(NULL);
+
+    return;
+  }
 
   ESP_LOGI(TAG, "BMP280: found %s\n", dev.id == BME280_CHIP_ID ? "BME280" : "BMP280");
 
@@ -76,7 +82,15 @@ void bh1750_task(void *pvParameters)
   memset(&dev, 0, sizeof(i2c_dev_t));
 
   ESP_ERROR_CHECK(bh1750_init_desc(&dev, BH1750_ADDR_LO, 0, (gpio_num_t)CONFIG_BH1750_I2C_SDA_GPIO, (gpio_num_t)CONFIG_BH1750_I2C_SCL_GPIO));
-  ESP_ERROR_CHECK(bh1750_setup(&dev, BH1750_MODE_CONTINUOUS, BH1750_RES_HIGH));
+
+  if (bh1750_setup(&dev, BH1750_MODE_CONTINUOUS, BH1750_RES_HIGH) != ESP_OK)
+  {
+    ESP_LOGE(TAG, "BH1750 not found!\n");
+    bh1750_free_desc(&dev);
+    vTaskDelete(NULL);
+
+    return;
+  }
 
   while (1)
   {
