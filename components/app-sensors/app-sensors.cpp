@@ -1,5 +1,13 @@
 #include "app-sensors.h"
 
+unsigned long lastPressureHistoryUpdateTime = INTERVAL_1_HOUR;
+unsigned long lastTemperatureHistoryUpdateTime = INTERVAL_15_MIN;
+unsigned long lastHumidityHistoryUpdateTime = INTERVAL_15_MIN;
+unsigned long lastCo2HistoryUpdateTime = INTERVAL_15_MIN;
+unsigned long lastTemperatureHistoryOneHourUpdateTime = INTERVAL_1_HOUR;
+unsigned long lastHumidityHistoryOneHourUpdateTime = INTERVAL_1_HOUR;
+unsigned long lastCo2HistoryOneHourUpdateTime = INTERVAL_1_HOUR;
+
 void bme280_task(void *pvParameters)
 {
   const char *TAG = "BME280";
@@ -48,6 +56,65 @@ void bme280_task(void *pvParameters)
     internalSensorData.dewPoint = (dewPoint * 100) / 100;
     internalSensorData.humIndex = humindex;
 
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastPressureHistoryUpdateTime > INTERVAL_1_HOUR)
+    {
+      lastPressureHistoryUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 23; i++)
+      {
+        pressureLast24H[i] = pressureLast24H[i + 1];
+        pressureLast24HmmHg[i] = pressureLast24HmmHg[i + 1];
+      }
+
+      pressureLast24H[23] = internalSensorData.pressure;
+      pressureLast24HmmHg[23] = internalSensorData.pressureMmHg;
+    }
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastTemperatureHistoryUpdateTime > INTERVAL_15_MIN)
+    {
+      lastTemperatureHistoryUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 95; i++)
+      {
+        temperatureLast24H[i] = temperatureLast24H[i + 1];
+      }
+      temperatureLast24H[95] = internalSensorData.temperature;
+    }
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastTemperatureHistoryOneHourUpdateTime > INTERVAL_1_HOUR)
+    {
+      lastTemperatureHistoryOneHourUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 59; i++)
+      {
+        temperatureLastHour[i] = temperatureLastHour[i + 1];
+      }
+
+      temperatureLastHour[59] = internalSensorData.temperature;
+    }
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastHumidityHistoryUpdateTime > INTERVAL_15_MIN)
+    {
+      lastHumidityHistoryUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 95; i++)
+      {
+        humidityLast24H[i] = humidityLast24H[i + 1];
+      }
+      humidityLast24H[95] = internalSensorData.humidity;
+    }
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastHumidityHistoryOneHourUpdateTime > INTERVAL_1_HOUR)
+    {
+      lastHumidityHistoryOneHourUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 59; i++)
+      {
+        humidityLastHour[i] = humidityLastHour[i + 1];
+      }
+      humidityLastHour[59] = internalSensorData.humidity;
+    }
+
     xSemaphoreGive(xGlobalVariablesMutex);
 
     vTaskDelay(CONFIG_APP_BME280_UPDATE_INTERVAL / portTICK_PERIOD_MS);
@@ -69,6 +136,33 @@ void mhz19_task(void *pvParameters)
     internalSensorData.co2 = co2;
 
     xSemaphoreGive(xGlobalVariablesMutex);
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastCo2HistoryUpdateTime > INTERVAL_15_MIN)
+    {
+      lastCo2HistoryUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 95; i++)
+      {
+        co2Last24H[i] = co2Last24H[i + 1];
+      }
+      co2Last24H[95] = (float)internalSensorData.co2;
+    }
+
+    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastCo2HistoryOneHourUpdateTime > INTERVAL_1_HOUR)
+    {
+      lastCo2HistoryOneHourUpdateTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+      for (int i = 0; i < 59; i++)
+      {
+        co2LastHour[i] = co2LastHour[i + 1];
+      }
+      co2LastHour[59] = (float)internalSensorData.co2;
+    }
+
+    ESP_LOGI(
+        TAG,
+        "CO2: %d\n",
+        internalSensorData.co2);
 
     vTaskDelay(CONFIG_APP_MHZ19_UPDATE_INTERVAL / portTICK_PERIOD_MS);
   }

@@ -5,6 +5,7 @@
 #include "app-sensors.h"
 #include "meteo_util.h"
 #include "esp_log.h"
+#include "app-display.h"
 
 void nrf24_task(void *pvParameters);
 

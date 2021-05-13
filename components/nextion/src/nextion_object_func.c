@@ -73,3 +73,15 @@ nextion_err_t nextion_object_set_picc(const void *object, uint32_t number)
     free(cmd);
     return result;
 }
+
+nextion_err_t nextion_object_set_pco(const void *object, uint32_t color)
+{
+    nextion_object_t *obj = (nextion_object_t *)object;
+    NEXTION_OBJ_SERVICE_CHECK(obj, "Object NULL", ESP_ERR_INVALID_ARG);
+    char *cmd = malloc(40 * sizeof(char));
+    bzero(cmd, 40);
+    sprintf(cmd, "%s.pco=%d", obj->descriptor.name, color);
+    nextion_err_t result = obj->display->send_cmd(obj->display, cmd);
+    free(cmd);
+    return result;
+}

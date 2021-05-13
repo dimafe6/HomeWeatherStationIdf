@@ -17,7 +17,7 @@ extern "C"
         // esp_err_t (*get_text_max_length)(nextion_display_t *display, uint32_t *length);
         // esp_err_t (*set_font)(nextion_display_t *display, uint32_t font_id);
         // esp_err_t (*get_font)(nextion_display_t *display, uint32_t *font_id);
-        // esp_err_t (*set_font_color_pco)(nextion_display_t *display, uint32_t color);
+        nextion_err_t (*set_font_color_pco)(const void *text_obj, uint32_t color);
         // esp_err_t (*get_font_color_pco)(nextion_display_t *display, uint32_t *color);
         // esp_err_t (*set_background_crop_picc)(nextion_display_t *display, uint32_t pic_id);
         // esp_err_t (*get_background_crop_picc)(nextion_display_t *display, uint32_t *pic_id);

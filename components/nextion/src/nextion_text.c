@@ -18,6 +18,7 @@ nextion_text_t *nextion_text_init(const nextion_display_t *display, nextion_desc
 
     ESP_ERROR_CHECK_WITHOUT_ABORT(nextion_object_fill(&text_obj->parent, display, descriptor, true));
     text_obj->set_text = nextion_object_set_text;
+    text_obj->set_font_color_pco = nextion_object_set_pco;
 
     return text_obj;
 }
