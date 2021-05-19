@@ -399,7 +399,7 @@ err_args:
  *      - NEXTION_MEM_ERR if error allocation decode resources
  *      - NEXTION_TIMEOUT
  */
-static nextion_err_t esp_nextion_display_send_cmd_get_string(const nextion_display_t * display, const char *cmd, const char *string_ret, size_t *size_ret)
+static nextion_err_t esp_nextion_display_send_cmd_get_string(const nextion_display_t *display, const char *cmd, const char *string_ret, size_t *size_ret)
 {
     NEXTION_CHECK(cmd, "CMD is null", err_args);
     NEXTION_CHECK(display, "Display is NULL", err_args);
@@ -533,12 +533,8 @@ nextion_display_t *nextion_display_init(nextion_system_variables_t *system_varia
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-#if CONFIG_PM_ENABLE
-        .source_clk = UART_SCLK_REF_TICK
-#else
-        .source_clk = UART_SCLK_APB
-#endif
-    };
+        .rx_flow_ctrl_thresh = 40,
+        .source_clk = UART_SCLK_REF_TICK};
 
     NEXTION_CHECK(uart_param_config(display->uart_port, &uart_config) == ESP_OK, "config uart parameter failed", err_uart_config);
 

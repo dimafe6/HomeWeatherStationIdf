@@ -13,7 +13,7 @@ esp_err_t mhz19_init_uart()
 		.parity = UART_PARITY_DISABLE,
 		.stop_bits = UART_STOP_BITS_1,
 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-		.rx_flow_ctrl_thresh = 122,
+		.rx_flow_ctrl_thresh = 40,
 		.source_clk = UART_SCLK_REF_TICK
 	};
 

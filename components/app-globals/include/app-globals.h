@@ -37,14 +37,14 @@ struct __attribute__((__packed__)) ExternalSensor
 struct ExternalSensorData
 {
   uint8_t sensorId = 255;
-  float temperature;
+  float temperature = 0;
   float temperatureMin = NULL;
   float temperatureMax = NULL;
-  float humidity;
+  float humidity = 0;
   float humidityMin = NULL;
   float humidityMax = NULL;
-  int16_t dewPoint;
-  int16_t humIndex;
+  int16_t dewPoint = 0;
+  int16_t humIndex = 0;
   uint8_t battery = 255;
   uint8_t signal = 255;
 };

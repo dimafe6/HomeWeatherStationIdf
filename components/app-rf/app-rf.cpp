@@ -34,46 +34,50 @@ void nrf24_task(void *pvParameters)
     {
         vTaskDelay(500 / portTICK_PERIOD_MS);
 
-        uint8_t pipeNum = 0;
+        uint8_t pipeNum = 1;
         if (radio.available(&pipeNum))
         {
-            xSemaphoreTake(xGlobalVariablesMutex, portMAX_DELAY);
 
-            radio.read(&externalSensor, sizeof(externalSensor));
-
-            prevExternalSensorData[pipeNum - 1] = externalSensorData[pipeNum - 1];
-
-            externalSensorData[pipeNum - 1].sensorId = pipeNum;
-            externalSensorData[pipeNum - 1].battery = externalSensor.battery;
-            externalSensorData[pipeNum - 1].signal = radio.testRPD();
-            externalSensorData[pipeNum - 1].humidity = float(externalSensor.humidity) / 100;
-
-            if (externalSensorData[pipeNum - 1].humidityMin == NULL)
+            if (xSemaphoreTake(xGlobalVariablesMutex, portMAX_DELAY) == pdTRUE)
             {
-                externalSensorData[pipeNum - 1].humidityMin = externalSensorData[pipeNum - 1].humidity;
-            }
-            else
-            {
-                externalSensorData[pipeNum - 1].humidityMin = min(externalSensorData[pipeNum - 1].humidityMin, externalSensorData[pipeNum - 1].humidity);
-            }
+                radio.read(&externalSensor, sizeof(externalSensor));
 
-            externalSensorData[pipeNum - 1].humidityMax = max(externalSensorData[pipeNum - 1].humidityMax, externalSensorData[pipeNum - 1].humidity);
-            externalSensorData[pipeNum - 1].temperature = float(externalSensor.temperature) / 100;
+                prevExternalSensorData[pipeNum - 1] = externalSensorData[pipeNum - 1];
 
-            if (externalSensorData[pipeNum - 1].temperatureMin == NULL)
-            {
-                externalSensorData[pipeNum - 1].temperatureMin = externalSensorData[pipeNum - 1].temperature;
-            }
-            else
-            {
-                externalSensorData[pipeNum - 1].temperatureMin = min(externalSensorData[pipeNum - 1].temperatureMin, externalSensorData[pipeNum - 1].temperature);
-            }
+                externalSensorData[pipeNum - 1].sensorId = pipeNum;
+                externalSensorData[pipeNum - 1].battery = externalSensor.battery;
+                externalSensorData[pipeNum - 1].signal = radio.testRPD();
+                externalSensorData[pipeNum - 1].humidity = float(externalSensor.humidity) / 100;
 
-            externalSensorData[pipeNum - 1].temperatureMax = max(externalSensorData[pipeNum - 1].temperatureMax, externalSensorData[pipeNum - 1].temperature);
-            externalSensorData[pipeNum - 1].dewPoint = dew_point(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].humidity);
-            externalSensorData[pipeNum - 1].humIndex = hum_index(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].dewPoint);
+                if (externalSensorData[pipeNum - 1].humidityMin == NULL)
+                {
+                    externalSensorData[pipeNum - 1].humidityMin = externalSensorData[pipeNum - 1].humidity;
+                }
+                else
+                {
+                    externalSensorData[pipeNum - 1].humidityMin = min(externalSensorData[pipeNum - 1].humidityMin, externalSensorData[pipeNum - 1].humidity);
+                }
 
-            xSemaphoreGive(xGlobalVariablesMutex);
+                externalSensorData[pipeNum - 1].humidityMax = max(externalSensorData[pipeNum - 1].humidityMax, externalSensorData[pipeNum - 1].humidity);
+                externalSensorData[pipeNum - 1].temperature = float(externalSensor.temperature) / 100;
+
+                if (externalSensorData[pipeNum - 1].temperatureMin == NULL)
+                {
+                    externalSensorData[pipeNum - 1].temperatureMin = externalSensorData[pipeNum - 1].temperature;
+                }
+                else
+                {
+                    externalSensorData[pipeNum - 1].temperatureMin = min(externalSensorData[pipeNum - 1].temperatureMin, externalSensorData[pipeNum - 1].temperature);
+                }
+
+                externalSensorData[pipeNum - 1].temperatureMax = max(externalSensorData[pipeNum - 1].temperatureMax, externalSensorData[pipeNum - 1].temperature);
+                externalSensorData[pipeNum - 1].dewPoint = dew_point(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].humidity);
+                externalSensorData[pipeNum - 1].humIndex = hum_index(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].dewPoint);
+
+                xSemaphoreGive(xGlobalVariablesMutex);
+            } else {
+                ESP_LOGE(TAG, "Could not obtain the semaphore xGlobalVariablesMutex from task %s", pcTaskGetTaskName(NULL));
+            }            
 
             ESP_LOGI(
                 TAG,
@@ -83,11 +87,6 @@ void nrf24_task(void *pvParameters)
                 externalSensorData[pipeNum - 1].humidity,
                 externalSensorData[pipeNum - 1].dewPoint,
                 externalSensorData[pipeNum - 1].humIndex);
-
-            if (currentOutdoorSensorId == pipeNum - 1)
-            {
-                print_current_outdoor_sensor();
-            }
 
             if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastExternalTemperatureHistoryUpdateTime > INTERVAL_15_MIN)
             {
