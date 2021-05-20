@@ -1,8 +1,5 @@
 #include "nextion_object.h"
 #include <string.h>
-#include "esp_log.h"
-
-static const char *TAG = "[Nextion Object]";
 
 nextion_err_t nextion_set_text(const nextion_display_t *display, const char *obj_name, const char *text)
 {

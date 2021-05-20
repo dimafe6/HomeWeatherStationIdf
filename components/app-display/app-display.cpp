@@ -68,6 +68,7 @@ void display_task(void *pvParameters)
     while (1)
     {
         print_current_outdoor_sensor();
+        print_time();
 
         vTaskDelay(CONFIG_APP_DISPLAY_UPDATE_INTERVAL / portTICK_PERIOD_MS);
     }
@@ -76,7 +77,7 @@ void display_task(void *pvParameters)
 void print_current_outdoor_sensor()
 {
     displayBuffer[0] = '\0';
-    snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%i", currentOutdoorSensorId);
+    snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%i", currentOutdoorSensorId + 1);
     nextion_set_text(display, "oSensIdx", displayBuffer);
 
     switch (externalSensorData[currentOutdoorSensorId].signal)
@@ -180,4 +181,25 @@ void print_current_outdoor_sensor()
     displayBuffer[0] = '\0';
     snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", (int)abs(externalSensorData[currentOutdoorSensorId].humidityMax));
     nextion_set_text(display, "oHumMax", displayBuffer);
+}
+
+void print_time()
+{
+    time_t now;
+    struct tm *local;
+    time(&now);
+    local = localtime(&now);
+    ESP_LOGI(TAG, "Current time: %04d-%02d-%02d %02d:%02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+
+    displayBuffer[0] = '\0';
+    snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", local->tm_hour);
+    nextion_set_text(display, "hour", displayBuffer);
+
+    displayBuffer[0] = '\0';
+    snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", local->tm_min);
+    nextion_set_text(display, "minute", displayBuffer);
+
+    displayBuffer[0] = '\0';
+    snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02u.%02u.%02u", local->tm_mday, local->tm_mon + 1, local->tm_year - 100);
+    nextion_set_text(display, "date", displayBuffer);
 }

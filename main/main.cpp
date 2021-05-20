@@ -1,7 +1,6 @@
 #include "main.h"
 #include "monitoring.h"
 
-
 extern "C"
 {
     void app_main();
@@ -21,8 +20,6 @@ void app_main()
         ESP_LOGW(TAG, "Could not get time from RTC.");
     }
 
-    set_timezone("EET-2EEST,M3.5.0/3,M10.5.0/4"); //TODO: Configure from display
-
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -31,15 +28,15 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
-    wifi_init_sta(CONFIG_DEFAULT_WIFI_SSID, CONFIG_DEFAULT_WIFI_PASS);
-
     TaskHandle_t xHandle = NULL;
 
-    xTaskCreatePinnedToCore(nrf24_task, "nrf24_task", configMINIMAL_STACK_SIZE * 4, NULL, 1, NULL, APP_CPU_NUM);    
+    xTaskCreatePinnedToCore(nrf24_task, "nrf24_task", configMINIMAL_STACK_SIZE * 4, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bme280_task, "bme280_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
-    xTaskCreatePinnedToCore(mhz19_task, "mhz19_task", configMINIMAL_STACK_SIZE * 2, NULL, 1, NULL, APP_CPU_NUM);
+    xTaskCreatePinnedToCore(mhz19_task, "mhz19_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bh1750_task, "bh1750_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(display_task, "display_task", configMINIMAL_STACK_SIZE * 4, NULL, 5, NULL, APP_CPU_NUM);
+
+    wifi_init_sta(CONFIG_DEFAULT_WIFI_SSID, CONFIG_DEFAULT_WIFI_PASS);
 
     /*while (1)
     {

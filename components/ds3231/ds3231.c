@@ -387,7 +387,6 @@ esp_err_t ds3231_get_time(i2c_dev_t *dev, struct tm *time)
     time->tm_mday = bcd2dec(data[4]);
     time->tm_mon  = bcd2dec(data[5] & DS3231_MONTH_MASK) - 1;
     time->tm_year = bcd2dec(data[6]) + 100;
-    time->tm_isdst = 0;
 
     // apply a time zone (if you are not using localtime on the rtc or you want to check/apply DST)
     //applyTZ(time);

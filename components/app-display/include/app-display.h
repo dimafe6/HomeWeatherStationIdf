@@ -11,5 +11,6 @@
 void init_display();
 void display_task(void *pvParameters);
 void print_current_outdoor_sensor();
+void print_time();
 
 #endif
