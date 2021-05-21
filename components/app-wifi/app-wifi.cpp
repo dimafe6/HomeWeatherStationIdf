@@ -9,8 +9,6 @@ static const char *TAG = "WiFi";
 static EventGroupHandle_t s_wifi_event_group = NULL;
 bool initialized = false;
 esp_mqtt_client_handle_t mqtt_client = NULL;
-esp_event_handler_instance_t instance_any_id;
-esp_event_handler_instance_t instance_got_ip;
 
 void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -141,13 +139,13 @@ void wifi_init(void)
                                                         ESP_EVENT_ANY_ID,
                                                         &event_handler,
                                                         NULL,
-                                                        &instance_any_id));
+                                                        NULL));
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                         IP_EVENT_STA_GOT_IP,
                                                         &event_handler,
                                                         NULL,
-                                                        &instance_got_ip));
+                                                        NULL));
 
     initialized = true;
 }

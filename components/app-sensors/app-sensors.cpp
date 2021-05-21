@@ -47,10 +47,28 @@ void bme280_task(void *pvParameters)
     {
 
       internalSensorData.temperature = temperature;
-      internalSensorData.temperatureMin = min(internalSensorData.temperatureMin, internalSensorData.temperature);
+
+      if (internalSensorData.temperatureMin == NULL)
+      {
+        internalSensorData.temperatureMin = internalSensorData.temperature;
+      }
+      else
+      {
+        internalSensorData.temperatureMin = min(internalSensorData.temperatureMin, internalSensorData.temperature);
+      }
+
       internalSensorData.temperatureMax = max(internalSensorData.temperatureMax, internalSensorData.temperature);
       internalSensorData.humidity = humidity;
-      internalSensorData.humidityMin = min(internalSensorData.humidityMin, internalSensorData.humidity);
+
+      if (internalSensorData.humidityMin == NULL)
+      {
+        internalSensorData.humidityMin = internalSensorData.humidity;
+      }
+      else
+      {
+        internalSensorData.humidityMin = min(internalSensorData.humidityMin, internalSensorData.humidity);
+      }
+
       internalSensorData.humidityMax = max(internalSensorData.humidityMax, internalSensorData.humidity);
       internalSensorData.pressure = pressure / 100.0F; //hPa
       internalSensorData.pressureMmHg = internalSensorData.pressure / 1.33322387415F;

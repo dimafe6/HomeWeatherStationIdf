@@ -15,11 +15,11 @@ struct InternalSensorData
 {
   int co2;
   float temperature;
-  float temperatureMin;
-  float temperatureMax;
+  float temperatureMin = NULL;
+  float temperatureMax = NULL;
   float humidity;
-  float humidityMin;
-  float humidityMax;
+  float humidityMin = NULL;
+  float humidityMax = NULL;
   float pressure; //hPa
   int pressureMmHg;
   float dewPoint;

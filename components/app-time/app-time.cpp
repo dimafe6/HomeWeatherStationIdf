@@ -64,12 +64,16 @@ bool obtain_time_from_rtc()
     struct timeval nowtime = {.tv_sec = mktime(gmt)};
     settimeofday(&nowtime, NULL);
 
-    time_t now = 0;
-    time(&now);
-    struct tm *local = localtime(&now);
+    struct tm *local = get_local_time();
 
     ESP_LOGI(TAG, "Current time: %04d-%02d-%02d %02d:%02d:%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
     ESP_ERROR_CHECK(ds3231_free_desc(&dev));
 
     return true;
+}
+
+struct tm *get_local_time()
+{
+    time_t now = time(NULL);
+    return localtime(&now);
 }
