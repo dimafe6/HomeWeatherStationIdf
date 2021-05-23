@@ -3,6 +3,7 @@
 
 #define INTERVAL_15_MIN 900000
 #define INTERVAL_1_HOUR 3600000
+#define INTERVAL_5_SEC 5000
 
 #include <stdint.h>
 #include "sdkconfig.h"
@@ -47,6 +48,8 @@ struct ExternalSensorData
   int16_t humIndex = 0;
   uint8_t battery = 255;
   uint8_t signal = 255;
+  uint32_t measurementTime = 0;
+  uint16_t sleepTime = 0;
 };
 
 extern SemaphoreHandle_t xGlobalVariablesMutex;

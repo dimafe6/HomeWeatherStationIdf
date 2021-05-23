@@ -31,4 +31,8 @@ config APP_RF_DATA_RATE
         0 - 1MBPS
         1 - 2MBPS
         2 - 250KBPS
+config APP_RF_MAX_LOSSS_MESSAGES_BEFORE_LOSE_SIGNAL
+    int "Max lost messages before lose signal"
+    default 5
+    range 1 100
 endmenu
