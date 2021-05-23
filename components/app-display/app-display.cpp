@@ -200,6 +200,7 @@ void print_current_outdoor_sensor()
     displayBuffer[0] = '\0';
     snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", (int)externalSensorData[currentOutdoorSensorId].humIndex);
     nextion_set_text(display, "oHumIndex", displayBuffer);
+    nextion_set_pco(display, "oHumIndex", getHumindexColor((int)externalSensorData[currentOutdoorSensorId].humIndex));
 
     displayBuffer[0] = '\0';
     snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", (int)abs(externalSensorData[currentOutdoorSensorId].humidity));
@@ -285,6 +286,7 @@ void print_indoor_sensor()
     displayBuffer[0] = '\0';
     snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", (int)internalSensorData.humIndex);
     nextion_set_text(display, "iHumIndex", displayBuffer);
+    nextion_set_pco(display, "iHumIndex", getHumindexColor((int)internalSensorData.humIndex));
 
     displayBuffer[0] = '\0';
     snprintf(displayBuffer, CONFIG_NEXTION_MAX_MSG_LENGTH, "%02d", (int)abs(internalSensorData.humidity));

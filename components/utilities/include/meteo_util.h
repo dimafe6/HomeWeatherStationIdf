@@ -23,5 +23,6 @@ char getZambrettiChar(float P, Trend trend);
 uint8_t getForecastImageNumberFromZambrettiChar(char zambrettiChar);
 uint8_t getForecastImageNumber();
 uint32_t getCO2Color(int co2);
+uint32_t getHumindexColor(int co2);
 
 #endif

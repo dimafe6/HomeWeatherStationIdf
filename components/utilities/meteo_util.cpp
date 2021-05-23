@@ -337,3 +337,29 @@ uint32_t getCO2Color(int co2)
 
     return 0;
 }
+
+uint32_t getHumindexColor(int humindex)
+{
+    if (humindex <= 19)
+    {
+        return 1024;
+    }
+    if (humindex >= 20 && humindex <= 29)
+    {
+        return 832;
+    }
+    else if (humindex >= 30 && humindex <= 39)
+    {
+        return 50500;
+    }
+    else if (humindex >= 40 && humindex <= 45)
+    {
+        return 45828;
+    }
+    else if (humindex > 45)
+    {
+        return 55554;
+    }
+
+    return 0;
+}

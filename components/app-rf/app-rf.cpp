@@ -65,7 +65,6 @@ void nrf24_task(void *pvParameters)
                 if (prevExternalSensorData[pipeNum - 1].measurementTime > 0)
                 {
                     externalSensorData[pipeNum - 1].sleepTime = externalSensorData[pipeNum - 1].measurementTime - prevExternalSensorData[pipeNum - 1].measurementTime;
-                    ESP_LOGI(TAG, "Sensor %i sleep time: %i", pipeNum, externalSensorData[pipeNum - 1].sleepTime);
                 }
 
                 if (externalSensorData[pipeNum - 1].humidityMin == NULL)
