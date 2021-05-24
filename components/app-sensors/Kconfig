@@ -1,0 +1,17 @@
+menu "Application sensors config"
+
+config APP_BME280_UPDATE_INTERVAL
+    int "Update interval for BME280 sensor"
+    default 5000
+    range 1000 600000
+
+config APP_MHZ19_UPDATE_INTERVAL
+    int "Update interval for MHZ19 sensor"
+    default 10000
+    range 2000 600000
+
+config APP_BH1750_UPDATE_INTERVAL
+    int "Update interval for BH1750 sensor"
+    default 1500
+    range 500 60000
+endmenu

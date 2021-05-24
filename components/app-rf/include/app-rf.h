@@ -6,6 +6,7 @@
 #include "meteo_util.h"
 #include "esp_log.h"
 #include "app-display.h"
+#include "app-mqtt.h"
 
 void nrf24_task(void *pvParameters);
 

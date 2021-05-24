@@ -1,0 +1,7 @@
+menu "Application display config"
+
+config APP_DISPLAY_UPDATE_INTERVAL
+    int "Update interval for display"
+    default 5000
+    range 1000 600000
+endmenu

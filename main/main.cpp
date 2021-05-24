@@ -37,6 +37,8 @@ void app_main()
     xTaskCreatePinnedToCore(display_task, "display_task", configMINIMAL_STACK_SIZE * 4, NULL, 5, NULL, APP_CPU_NUM);
 
     wifi_init_sta(CONFIG_DEFAULT_WIFI_SSID, CONFIG_DEFAULT_WIFI_PASS);
+    mqtt_app_init();
+
 
     /*while (1)
     {

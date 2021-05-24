@@ -1,0 +1,28 @@
+menu "Application MQTT config"
+config MQTT_BROKER_HOST
+    string "Broker host"
+    default "iot-server.tk"
+    help
+        URL of the broker to connect to
+
+config MQTT_BROKER_USER
+    string "MQTT username"
+    default "root"
+
+config MQTT_BROKER_PASS
+    string "MQTT password"
+    default ""
+
+config MQTT_BROKER_PORT
+    int "MQTT port"
+    default 1883
+
+config MQTT_BROKER_PORT
+    int "MQTT port"
+    default 1883
+
+config MQTT_BROKER_BASE_TOPIC
+    string  "MQTT base topic"
+    default "/hwt/"
+
+endmenu

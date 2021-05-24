@@ -91,17 +91,19 @@ void init_display()
     display = (const nextion_display_t *)nextion_display_init(&system_variables);
     nextion_register_event_handler(display, (nextion_event_t)ESP_EVENT_ANY_ID, nextion_event_handler, (void *)display);
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &wifi_event_handler,
-                                                        NULL,
-                                                        NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT,
+        ESP_EVENT_ANY_ID,
+        &wifi_event_handler,
+        NULL,
+        NULL));
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
-                                                        &wifi_event_handler,
-                                                        NULL,
-                                                        NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT,
+        IP_EVENT_STA_GOT_IP,
+        &wifi_event_handler,
+        NULL,
+        NULL));
 }
 
 void display_task(void *pvParameters)

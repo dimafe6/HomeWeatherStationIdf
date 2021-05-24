@@ -5,6 +5,7 @@ unsigned long lastExternalHumidityHistoryUpdateTime = INTERVAL_15_MIN;
 unsigned long lastExternalTemperatureHistoryOneHourUpdateTime = INTERVAL_1_HOUR;
 unsigned long lastExternalHumidityHistoryOneHourUpdateTime = INTERVAL_1_HOUR;
 unsigned long lastSensorSignalCheckTime = INTERVAL_5_SEC;
+unsigned long lastDataSendToMQTT = INTERVAL_15_MIN;
 
 static const uint64_t pipes[5] = {0xF0F0F0F0D2LL, 0xF0F0F0F0C3LL, 0xF0F0F0F0B4LL, 0xF0F0F0F0A5LL, 0xF0F0F0F096LL};
 
@@ -102,6 +103,42 @@ void nrf24_task(void *pvParameters)
                     externalSensorData[pipeNum - 1].humidity,
                     externalSensorData[pipeNum - 1].dewPoint,
                     externalSensorData[pipeNum - 1].humIndex);
+
+                if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastDataSendToMQTT > INTERVAL_15_MIN)
+                {
+                    lastDataSendToMQTT = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+                    char buf[10] = {0};
+                    char topic_name[100] = {0};
+
+                    sprintf(topic_name, "outdoor/%i/temperature", pipeNum);
+                    sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].temperature);
+                    mqtt_pub(topic_name, buf);
+
+                    buf[0] = '\0';
+                    topic_name[0] = '\0';
+                    sprintf(topic_name, "outdoor/%i/humidity", pipeNum);
+                    sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].humidity);
+                    mqtt_pub(topic_name, buf);
+
+                    buf[0] = '\0';
+                    topic_name[0] = '\0';
+                    sprintf(topic_name, "outdoor/%i/dewpoint", pipeNum);
+                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].dewPoint);
+                    mqtt_pub(topic_name, buf);
+
+                    buf[0] = '\0';
+                    topic_name[0] = '\0';
+                    sprintf(topic_name, "outdoor/%i/humindex", pipeNum);
+                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].humIndex);
+                    mqtt_pub(topic_name, buf);
+
+                    buf[0] = '\0';
+                    topic_name[0] = '\0';
+                    sprintf(topic_name, "outdoor/%i/battery", pipeNum);
+                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].battery);
+                    mqtt_pub(topic_name, buf);
+                }
             }
             else
             {

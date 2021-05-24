@@ -2,6 +2,7 @@
 #define APP_SENSORS_H_
 
 #include "app-globals.h"
+#include "app-mqtt.h"
 #include <BME280.h>
 #include "MH-Z19.h"
 #include "bh1750.h"

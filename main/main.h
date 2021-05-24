@@ -11,5 +11,6 @@
 #include "app-wifi.h"
 #include "app-time.h"
 #include "app-rf.h"
+#include "app-mqtt.h"
 
 #endif

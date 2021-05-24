@@ -1,0 +1,9 @@
+menu "Application WiFi config"
+config DEFAULT_WIFI_SSID
+    string  "DEFAULT_WIFI_SSID"
+    default "dimaPC"
+
+config DEFAULT_WIFI_PASS
+    string  "DEFAULT_WIFI_PASS"
+    default "12345678"
+endmenu

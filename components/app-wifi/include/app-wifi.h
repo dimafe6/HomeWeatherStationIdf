@@ -13,8 +13,6 @@
 #include "lwip/sys.h"
 #include "app-time.h"
 
-#include "mqtt_client.h"
-
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
