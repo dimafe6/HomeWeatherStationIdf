@@ -104,6 +104,8 @@ void init_display()
         &wifi_event_handler,
         NULL,
         NULL));
+
+    display->send_cmd(display, "page 0");
 }
 
 void display_task(void *pvParameters)

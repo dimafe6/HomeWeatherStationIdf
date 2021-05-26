@@ -139,11 +139,11 @@ esp_err_t bmp280_init_default_params(bmp280_params_t *params)
 {
     CHECK_ARG(params);
 
-    params->mode = BMP280_MODE_NORMAL;
-    params->filter = BMP280_FILTER_OFF;
-    params->oversampling_pressure = BMP280_STANDARD;
-    params->oversampling_temperature = BMP280_STANDARD;
-    params->oversampling_humidity = BMP280_STANDARD;
+    params->mode = BMP280_MODE_FORCED;
+    params->filter = BMP280_FILTER_4;
+    params->oversampling_pressure = BMP280_HIGH_RES;
+    params->oversampling_temperature = BMP280_HIGH_RES;
+    params->oversampling_humidity = BMP280_HIGH_RES;
     params->standby = BMP280_STANDBY_250;
 
     return ESP_OK;

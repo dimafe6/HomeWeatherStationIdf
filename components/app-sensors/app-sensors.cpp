@@ -35,6 +35,14 @@ void bme280_task(void *pvParameters)
 
   while (1)
   {
+    bmp280_force_measurement(&dev);
+    bool busy = false;
+    do
+    {
+      vTaskDelay(pdMS_TO_TICKS(1));
+      bmp280_is_measuring(&dev, &busy);
+    } while (busy);
+
     if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK)
     {
       ESP_LOGE(TAG, "Temperature/pressure reading failed!\n");
