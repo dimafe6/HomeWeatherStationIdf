@@ -32,6 +32,7 @@ void nrf24_task(void *pvParameters)
     radio.openReadingPipe(5, pipes[4]);
 
     radio.startListening();
+
     while (true)
     {
         vTaskDelay(500 / portTICK_PERIOD_MS);
@@ -43,102 +44,105 @@ void nrf24_task(void *pvParameters)
             {
                 radio.read(&externalSensor, sizeof(externalSensor));
 
-                if (externalSensor.temperature / 100 > 60 || externalSensor.temperature / 100 < -60)
+                if (externalSensor.temperature / 100 < 60 && externalSensor.temperature / 100 > -60 &&
+                    externalSensor.humidity / 100 < 100 && externalSensor.humidity / 100 > 0)
                 {
-                    return;
-                }
+                    prevExternalSensorData[pipeNum - 1] = externalSensorData[pipeNum - 1];
 
-                if (externalSensor.humidity / 100 >= 100 || externalSensor.humidity / 100 <= 0)
-                {
-                    return;
-                }
+                    externalSensorData[pipeNum - 1].sensorId = pipeNum;
+                    struct timeval tv_now;
+                    gettimeofday(&tv_now, NULL);
+                    externalSensorData[pipeNum - 1].measurementTime = (uint32_t)tv_now.tv_sec;
+                    externalSensorData[pipeNum - 1].battery = externalSensor.battery;
+                    externalSensorData[pipeNum - 1].signal = radio.testRPD();
+                    externalSensorData[pipeNum - 1].humidity = float(externalSensor.humidity) / 100;
 
-                prevExternalSensorData[pipeNum - 1] = externalSensorData[pipeNum - 1];
+                    if (prevExternalSensorData[pipeNum - 1].measurementTime > 0)
+                    {
+                        externalSensorData[pipeNum - 1].sleepTime = externalSensorData[pipeNum - 1].measurementTime - prevExternalSensorData[pipeNum - 1].measurementTime;
+                    }
 
-                externalSensorData[pipeNum - 1].sensorId = pipeNum;
-                struct timeval tv_now;
-                gettimeofday(&tv_now, NULL);
-                externalSensorData[pipeNum - 1].measurementTime = (uint32_t)tv_now.tv_sec;
-                externalSensorData[pipeNum - 1].battery = externalSensor.battery;
-                externalSensorData[pipeNum - 1].signal = radio.testRPD();
-                externalSensorData[pipeNum - 1].humidity = float(externalSensor.humidity) / 100;
+                    if (externalSensorData[pipeNum - 1].humidityMin == NULL)
+                    {
+                        externalSensorData[pipeNum - 1].humidityMin = externalSensorData[pipeNum - 1].humidity;
+                    }
+                    else
+                    {
+                        externalSensorData[pipeNum - 1].humidityMin = min(externalSensorData[pipeNum - 1].humidity, externalSensorData[pipeNum - 1].humidityMin);
+                    }
 
-                if (prevExternalSensorData[pipeNum - 1].measurementTime > 0)
-                {
-                    externalSensorData[pipeNum - 1].sleepTime = externalSensorData[pipeNum - 1].measurementTime - prevExternalSensorData[pipeNum - 1].measurementTime;
-                }
+                    externalSensorData[pipeNum - 1].humidityMax = max(externalSensorData[pipeNum - 1].humidity, externalSensorData[pipeNum - 1].humidityMax);
+                    externalSensorData[pipeNum - 1].temperature = float(externalSensor.temperature) / 100;
 
-                if (externalSensorData[pipeNum - 1].humidityMin == NULL)
-                {
-                    externalSensorData[pipeNum - 1].humidityMin = externalSensorData[pipeNum - 1].humidity;
+                    if (externalSensorData[pipeNum - 1].temperatureMin == NULL)
+                    {
+                        externalSensorData[pipeNum - 1].temperatureMin = externalSensorData[pipeNum - 1].temperature;
+                    }
+                    else
+                    {
+                        externalSensorData[pipeNum - 1].temperatureMin = min(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].temperatureMin);
+                    }
+
+                    externalSensorData[pipeNum - 1].temperatureMax = max(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].temperatureMax);
+                    externalSensorData[pipeNum - 1].dewPoint = dew_point(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].humidity);
+                    externalSensorData[pipeNum - 1].humIndex = hum_index(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].dewPoint);
+
+                    ESP_LOGI(
+                        TAG,
+                        "Sensor %i:\nTemp: %02.2f\nHum: %02.2f\nDew: %i\nHI: %i\n",
+                        pipeNum,
+                        externalSensorData[pipeNum - 1].temperature,
+                        externalSensorData[pipeNum - 1].humidity,
+                        externalSensorData[pipeNum - 1].dewPoint,
+                        externalSensorData[pipeNum - 1].humIndex);
+
+                    if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastDataSendToMQTT > INTERVAL_15_MIN)
+                    {
+                        lastDataSendToMQTT = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+                        char buf[10] = {0};
+                        char topic_name[100] = {0};
+
+                        sprintf(topic_name, "outdoor/%i/temperature", pipeNum);
+                        sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].temperature);
+                        mqtt_pub(topic_name, buf);
+
+                        buf[0] = '\0';
+                        topic_name[0] = '\0';
+                        sprintf(topic_name, "outdoor/%i/humidity", pipeNum);
+                        sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].humidity);
+                        mqtt_pub(topic_name, buf);
+
+                        buf[0] = '\0';
+                        topic_name[0] = '\0';
+                        sprintf(topic_name, "outdoor/%i/dewpoint", pipeNum);
+                        sprintf(buf, "%i", externalSensorData[pipeNum - 1].dewPoint);
+                        mqtt_pub(topic_name, buf);
+
+                        buf[0] = '\0';
+                        topic_name[0] = '\0';
+                        sprintf(topic_name, "outdoor/%i/humindex", pipeNum);
+                        sprintf(buf, "%i", externalSensorData[pipeNum - 1].humIndex);
+                        mqtt_pub(topic_name, buf);
+
+                        buf[0] = '\0';
+                        topic_name[0] = '\0';
+                        sprintf(topic_name, "outdoor/%i/battery", pipeNum);
+                        sprintf(buf, "%i", externalSensorData[pipeNum - 1].battery);
+                        mqtt_pub(topic_name, buf);
+                    }
                 }
                 else
                 {
-                    externalSensorData[pipeNum - 1].humidityMin = min(externalSensorData[pipeNum - 1].humidity, externalSensorData[pipeNum - 1].humidityMin);
+                    ESP_LOGI(
+                        TAG,
+                        "Wrong sensor %i data:\nTemp(x100): %i\nHum(x100): %i\n",
+                        pipeNum,
+                        externalSensor.temperature,
+                        externalSensor.humidity);
                 }
-
-                externalSensorData[pipeNum - 1].humidityMax = max(externalSensorData[pipeNum - 1].humidity, externalSensorData[pipeNum - 1].humidityMax);
-                externalSensorData[pipeNum - 1].temperature = float(externalSensor.temperature) / 100;
-
-                if (externalSensorData[pipeNum - 1].temperatureMin == NULL)
-                {
-                    externalSensorData[pipeNum - 1].temperatureMin = externalSensorData[pipeNum - 1].temperature;
-                }
-                else
-                {
-                    externalSensorData[pipeNum - 1].temperatureMin = min(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].temperatureMin);
-                }
-
-                externalSensorData[pipeNum - 1].temperatureMax = max(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].temperatureMax);
-                externalSensorData[pipeNum - 1].dewPoint = dew_point(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].humidity);
-                externalSensorData[pipeNum - 1].humIndex = hum_index(externalSensorData[pipeNum - 1].temperature, externalSensorData[pipeNum - 1].dewPoint);
 
                 xSemaphoreGive(xGlobalVariablesMutex);
-
-                ESP_LOGI(
-                    TAG,
-                    "Sensor %i:\nTemp: %02.2f\nHum: %02.2f\nDew: %i\nHI: %i\n",
-                    pipeNum,
-                    externalSensorData[pipeNum - 1].temperature,
-                    externalSensorData[pipeNum - 1].humidity,
-                    externalSensorData[pipeNum - 1].dewPoint,
-                    externalSensorData[pipeNum - 1].humIndex);
-
-                if ((xTaskGetTickCount() * portTICK_PERIOD_MS) - lastDataSendToMQTT > INTERVAL_15_MIN)
-                {
-                    lastDataSendToMQTT = xTaskGetTickCount() * portTICK_PERIOD_MS;
-
-                    char buf[10] = {0};
-                    char topic_name[100] = {0};
-
-                    sprintf(topic_name, "outdoor/%i/temperature", pipeNum);
-                    sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].temperature);
-                    mqtt_pub(topic_name, buf);
-
-                    buf[0] = '\0';
-                    topic_name[0] = '\0';
-                    sprintf(topic_name, "outdoor/%i/humidity", pipeNum);
-                    sprintf(buf, "%2.2f", externalSensorData[pipeNum - 1].humidity);
-                    mqtt_pub(topic_name, buf);
-
-                    buf[0] = '\0';
-                    topic_name[0] = '\0';
-                    sprintf(topic_name, "outdoor/%i/dewpoint", pipeNum);
-                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].dewPoint);
-                    mqtt_pub(topic_name, buf);
-
-                    buf[0] = '\0';
-                    topic_name[0] = '\0';
-                    sprintf(topic_name, "outdoor/%i/humindex", pipeNum);
-                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].humIndex);
-                    mqtt_pub(topic_name, buf);
-
-                    buf[0] = '\0';
-                    topic_name[0] = '\0';
-                    sprintf(topic_name, "outdoor/%i/battery", pipeNum);
-                    sprintf(buf, "%i", externalSensorData[pipeNum - 1].battery);
-                    mqtt_pub(topic_name, buf);
-                }
             }
             else
             {
