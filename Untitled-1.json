@@ -1,0 +1,14 @@
+{
+    "dev_cla": "battery",
+    "name": "Battery",
+    "uniq_id": "hwt_outdoor_bat_1",
+    "stat_t": "hwt/outdoor/1",
+    "unit_of_meas": "%",
+    "val_tpl": "{{ value_json.bat }}",
+    "dev": {
+      "ids": "identifier",
+      "mf": "Dmytro Feshchenko",
+      "mdl": "Home weather station",
+      "name": "Home weather station"
+    }
+  }

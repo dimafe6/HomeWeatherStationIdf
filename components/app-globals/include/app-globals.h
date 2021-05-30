@@ -1,9 +1,10 @@
 #ifndef APP_GLOBALS_H_
 #define APP_GLOBALS_H_
 
+#define INTERVAL_5_SEC 5000
+#define INTERVAL_10_SEC 10000
 #define INTERVAL_15_MIN 900000
 #define INTERVAL_1_HOUR 3600000
-#define INTERVAL_5_SEC 5000
 
 #include <stdint.h>
 #include "sdkconfig.h"
@@ -75,4 +76,6 @@ extern float co2Last24H[96];
 extern float co2LastHour[60];
 
 extern uint8_t currentOutdoorSensorId;
+
+extern char mac_address[18];
 #endif

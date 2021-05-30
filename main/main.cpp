@@ -28,17 +28,20 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
+    uint8_t mac_bytes[6];
+    esp_read_mac(mac_bytes, ESP_MAC_WIFI_STA);
+    sprintf(mac_address, "%02x-%02x-%02x-%02x-%02x-%02x", mac_bytes[0], mac_bytes[1], mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
+
     TaskHandle_t xHandle = NULL;
 
+    xTaskCreatePinnedToCore(display_task, "display_task", configMINIMAL_STACK_SIZE * 4, NULL, 5, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(nrf24_task, "nrf24_task", configMINIMAL_STACK_SIZE * 4, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bme280_task, "bme280_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(mhz19_task, "mhz19_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bh1750_task, "bh1750_task", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL, APP_CPU_NUM);
-    xTaskCreatePinnedToCore(display_task, "display_task", configMINIMAL_STACK_SIZE * 4, NULL, 5, NULL, APP_CPU_NUM);
 
     wifi_init_sta(CONFIG_DEFAULT_WIFI_SSID, CONFIG_DEFAULT_WIFI_PASS);
     mqtt_app_init();
-
 
     /*while (1)
     {

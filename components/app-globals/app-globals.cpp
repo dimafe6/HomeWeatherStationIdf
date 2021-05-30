@@ -23,3 +23,5 @@ float co2Last24H[96] = {0};
 float co2LastHour[60] = {0};
 
 uint8_t currentOutdoorSensorId = 0;
+
+char mac_address[18] = {0};

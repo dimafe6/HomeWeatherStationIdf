@@ -17,12 +17,4 @@ config MQTT_BROKER_PORT
     int "MQTT port"
     default 1883
 
-config MQTT_BROKER_PORT
-    int "MQTT port"
-    default 1883
-
-config MQTT_BROKER_BASE_TOPIC
-    string  "MQTT base topic"
-    default "/hwt/"
-
 endmenu
